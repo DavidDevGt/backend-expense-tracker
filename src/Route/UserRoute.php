@@ -22,10 +22,8 @@ class UserRoute {
 
             $_SESSION['token'] = bin2hex(random_bytes(32));
 
-            // Devolver respuesta de éxito
             return ['success' => true, 'token' => $_SESSION['token'], 'message' => 'Has iniciado sesión'];
         } else {
-            // Devolver respuesta de fracaso
             return ['success' => false, 'message' => 'Usuario o contraseña incorrectos'];
         }
     }
