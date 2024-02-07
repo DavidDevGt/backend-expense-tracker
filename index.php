@@ -18,6 +18,8 @@ $transactionRoute = new TransactionRoute($transactionModel);
 
 $router = new \AltoRouter();
 
+$router->setBasePath('/backend-expense-tracker');
+
 // Rutas para el usuario
 $router->map('POST', '/users/login', function() use ($userRoute) {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -58,6 +60,17 @@ $router->map('DELETE', '/transactions/[:id]', function($id) use ($transactionRou
     $response = $transactionRoute->deleteTransaction($id);
     echo json_encode($response);
 });
+
+// Agregar encabezados CORS
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Si la solicitud es de tipo OPTIONS, devuelve los encabezados CORS y termina el script
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 // Match the current request
 $match = $router->match();
