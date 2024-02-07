@@ -6,6 +6,7 @@ use App\Model\UserModel;
 use App\Model\TransactionModel;
 use App\Route\UserRoute;
 use App\Route\TransactionRoute;
+use App\Middleware\AuthMiddleware;
 
 $database = new Database();
 $db = $database->connect();
@@ -33,33 +34,33 @@ $router->map('POST', '/users/logout', function() use ($userRoute) {
 });
 
 // Rutas para las transacciones
-$router->map('GET', '/transactions', function() use ($transactionRoute) {
-    $userId = $_GET['userId']; // Suponiendo que pasas el userId como query param
+$router->map('GET', '/transactions', AuthMiddleware::verifyToken(function($userId) use ($transactionRoute) {
     $response = $transactionRoute->getTransactions($userId);
     echo json_encode($response);
-});
+}));
 
-$router->map('POST', '/transactions', function() use ($transactionRoute) {
+$router->map('POST', '/transactions', AuthMiddleware::verifyToken(function($userId) use ($transactionRoute) {
     $data = json_decode(file_get_contents('php://input'), true);
-    $response = $transactionRoute->createTransaction($data['userId'], $data['text'], $data['amount']);
+    $response = $transactionRoute->createTransaction($userId, $data['text'], $data['amount']);
     echo json_encode($response);
-});
+}));
 
-$router->map('GET', '/transactions/[:id]', function($id) use ($transactionRoute) {
-    $response = $transactionRoute->getTransaction($id);
+$router->map('GET', '/transactions/[:id]', AuthMiddleware::verifyToken(function($userId, $id) use ($transactionRoute) {
+    $response = $transactionRoute->getTransaction($userId, $id);
     echo json_encode($response);
-});
+}));
 
-$router->map('PUT', '/transactions/[:id]', function($id) use ($transactionRoute) {
+$router->map('PUT', '/transactions/[:id]', AuthMiddleware::verifyToken(function($userId, $id) use ($transactionRoute) {
     $data = json_decode(file_get_contents('php://input'), true);
-    $response = $transactionRoute->updateTransaction($id, $data['text'], $data['amount']);
+    $response = $transactionRoute->updateTransaction($userId, $id, $data['text'], $data['amount']);
     echo json_encode($response);
-});
+}));
 
-$router->map('DELETE', '/transactions/[:id]', function($id) use ($transactionRoute) {
-    $response = $transactionRoute->deleteTransaction($id);
+$router->map('DELETE', '/transactions/[:id]', AuthMiddleware::verifyToken(function($userId, $id) use ($transactionRoute) {
+    $response = $transactionRoute->deleteTransaction($userId, $id);
     echo json_encode($response);
-});
+}));
+
 
 // Agregar encabezados CORS
 header('Access-Control-Allow-Origin: *');

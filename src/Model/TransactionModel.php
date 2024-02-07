@@ -25,24 +25,24 @@ class TransactionModel {
         return $stmt->insert_id;
     }
 
-    public function getTransactionById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM transactions WHERE id = ?");
-        $stmt->bind_param("i", $id);
+    public function getTransactionById($userId, $transactionId) {
+        $stmt = $this->db->prepare("SELECT * FROM transactions WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("ii", $transactionId, $userId);
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->fetch_assoc();
     }
 
-    public function updateTransaction($id, $text, $amount) {
-        $stmt = $this->db->prepare("UPDATE transactions SET text = ?, amount = ? WHERE id = ?");
-        $stmt->bind_param("sdi", $text, $amount, $id);
+    public function updateTransaction($userId, $transactionId, $text, $amount) {
+        $stmt = $this->db->prepare("UPDATE transactions SET text = ?, amount = ? WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("sdii", $text, $amount, $transactionId, $userId);
         $stmt->execute();
         return $stmt->affected_rows;
     }
 
-    public function deactivateTransaction($id) {
-        $stmt = $this->db->prepare("UPDATE transactions SET active = FALSE WHERE id = ?");
-        $stmt->bind_param("i", $id);
+    public function deactivateTransaction($userId, $transactionId) {
+        $stmt = $this->db->prepare("UPDATE transactions SET active = FALSE WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("ii", $transactionId, $userId);
         $stmt->execute();
         return $stmt->affected_rows;
     }
