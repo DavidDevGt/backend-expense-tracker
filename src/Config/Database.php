@@ -4,10 +4,10 @@ namespace App\Config;
 use mysqli;
 
 class Database {
-    private $host = 'localhost';
-    private $db = 'money_tracker_db';
-    private $user = 'root';
-    private $pass = '';
+    private $host = $_ENV['DB_HOST'];
+    private $db = $_ENV['DB_NAME'];
+    private $user = $_ENV['DB_USER'];
+    private $pass = $_ENV['DB_PASS'];
     private $conn;
 
     public function connect() {
