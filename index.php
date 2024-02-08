@@ -22,7 +22,7 @@ $transactionRoute = new TransactionRoute($transactionModel);
 
 $router = new \AltoRouter();
 
-$router->setBasePath('/backend-expense-tracker');
+//$router->setBasePath('/backend-expense-tracker');
 
 $router->map('GET', '/', function() {
     $response = [
