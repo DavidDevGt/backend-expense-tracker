@@ -2,28 +2,33 @@
 
 namespace App\Middleware;
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 class AuthMiddleware
 {
     public static function verifyToken($callback)
     {
-        return function () use ($callback) {
-            //session_start();
-            if (!isset($_SESSION['token']) || empty($_SESSION['token'])) {
+        return function ($routeParams) use ($callback) {
+            $headers = getallheaders();
+            $token = isset($headers['Authorization']) ? explode(" ", $headers['Authorization'])[1] : null;
+
+            if (!$token) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'message' => 'Unauthorized']);
                 exit();
             }
 
-            $requestToken = isset(getallheaders()['Authorization']) ? explode(" ", getallheaders()['Authorization'])[1] : null;
-            if ($requestToken !== $_SESSION['token']) {
+            try {
+                $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET_KEY'], 'HS256'));
+                $userId = $decoded->user_id;
+            } catch (\Exception $e) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                echo json_encode(['success' => false, 'message' => 'Unauthorized', 'error' => $e->getMessage()]);
                 exit();
             }
 
-            $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-
-            $callback($userId);
+            $callback($userId, $routeParams);
         };
     }
 }

@@ -1,6 +1,9 @@
 <?php
 require 'vendor/autoload.php';
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 use App\Config\Database;
 use App\Model\UserModel;
 use App\Model\TransactionModel;
@@ -22,10 +25,8 @@ $router = new \AltoRouter();
 $router->setBasePath('/backend-expense-tracker');
 
 $router->map('GET', '/', function() {
-    //var_dump($_SESSION);
     $response = [
         'message' => 'Welcome to the Expense Tracker API',
-        'session_token' => isset($_SESSION['token']) ? $_SESSION['token'] : 'No token in session',
     ];
 
     echo json_encode($response);
@@ -67,15 +68,18 @@ $router->map('PUT', '/transactions/[:id]', AuthMiddleware::verifyToken(function(
     echo json_encode($response);
 }));
 
-$router->map('DELETE', '/transactions/[:id]', AuthMiddleware::verifyToken(function($userId, $id) use ($transactionRoute) {
+$router->map('DELETE', '/transactions/[:id]', AuthMiddleware::verifyToken(function($userId, $params) use ($transactionRoute) {
+    $id = $params['id'];
     $response = $transactionRoute->deleteTransaction($userId, $id);
     echo json_encode($response);
 }));
 
 
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: http://localhost:5173');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true');
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
@@ -86,8 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 $match = $router->match();
 
 header('Content-Type: application/json');
-if($match && is_callable($match['target'])) {
-    call_user_func_array($match['target'], $match['params']); 
+if ($match && is_callable($match['target'])) {
+    call_user_func_array($match['target'], [$match['params']]);
 } else {
     header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
     echo json_encode(['message' => 'Route not found']);

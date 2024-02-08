@@ -2,42 +2,34 @@
 namespace App\Route;
 
 use App\Model\UserModel;
+use Firebase\JWT\JWT;
 
 class UserRoute {
     private $userModel;
 
     public function __construct(UserModel $userModel) {
         $this->userModel = $userModel;
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
     }
 
     public function login($username, $password) {
         $user = $this->userModel->findUserByUsername($username);
         if ($user && password_verify($password, $user['hashed_password'])) {
-            session_regenerate_id();
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
+            $payload = [
+                'iat' => time(),
+                'exp' => time() + (60 * 60),
+                'user_id' => $user['id']
+            ];
 
-            $_SESSION['token'] = bin2hex(random_bytes(32));
+            $jwt = JWT::encode($payload, $_ENV['JWT_SECRET_KEY'], 'HS256');
 
-            $array_session = array(
-                'user_id' => $_SESSION['user_id'],
-                'username' => $_SESSION['username'],
-                'token' => $_SESSION['token']
-            );
-
-            return ['success' => true, 'sessiondata' => $array_session, 'token' => $_SESSION['token'], 'message' => 'Has iniciado sesión'];
+            return ['success' => true, 'token' => $jwt, 'message' => 'Has iniciado sesión'];
         } else {
             return ['success' => false, 'message' => 'Usuario o contraseña incorrectos'];
         }
     }
 
     public function logout() {
-        $_SESSION = [];
-        session_destroy();
-
+        // El manejo real del token JWT (su eliminación o invalidación) debe realizarse en el cliente.
         return ['success' => true, 'message' => 'Has cerrado sesión'];
     }
 }
