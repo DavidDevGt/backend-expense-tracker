@@ -2,13 +2,24 @@
 namespace App\Config;
 
 use mysqli;
+use Dotenv\Dotenv;
 
 class Database {
-    private $host = $_ENV['DB_HOST'];
-    private $db = $_ENV['DB_NAME'];
-    private $user = $_ENV['DB_USER'];
-    private $pass = $_ENV['DB_PASS'];
+    private $host;
+    private $db;
+    private $user;
+    private $pass;
     private $conn;
+
+    public function __construct() {
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+        $dotenv->load();
+
+        $this->host = $_ENV['DB_HOST'];
+        $this->db = $_ENV['DB_NAME'];
+        $this->user = $_ENV['DB_USER'];
+        $this->pass = $_ENV['DB_PASS'];
+    }
 
     public function connect() {
         $this->conn = null;
