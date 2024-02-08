@@ -21,6 +21,17 @@ $router = new \AltoRouter();
 
 $router->setBasePath('/backend-expense-tracker');
 
+$router->map('GET', '/', function() {
+    //var_dump($_SESSION);
+    $response = [
+        'message' => 'Welcome to the Expense Tracker API',
+        'session_token' => isset($_SESSION['token']) ? $_SESSION['token'] : 'No token in session',
+    ];
+
+    echo json_encode($response);
+});
+
+
 // Rutas para el usuario
 $router->map('POST', '/users/login', function() use ($userRoute) {
     $data = json_decode(file_get_contents('php://input'), true);

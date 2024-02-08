@@ -22,7 +22,13 @@ class UserRoute {
 
             $_SESSION['token'] = bin2hex(random_bytes(32));
 
-            return ['success' => true, 'token' => $_SESSION['token'], 'message' => 'Has iniciado sesión'];
+            $array_session = array(
+                'user_id' => $_SESSION['user_id'],
+                'username' => $_SESSION['username'],
+                'token' => $_SESSION['token']
+            );
+
+            return ['success' => true, 'sessiondata' => $array_session, 'token' => $_SESSION['token'], 'message' => 'Has iniciado sesión'];
         } else {
             return ['success' => false, 'message' => 'Usuario o contraseña incorrectos'];
         }

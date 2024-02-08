@@ -7,7 +7,7 @@ class AuthMiddleware
     public static function verifyToken($callback)
     {
         return function () use ($callback) {
-            session_start();
+            //session_start();
             if (!isset($_SESSION['token']) || empty($_SESSION['token'])) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'message' => 'Unauthorized']);
